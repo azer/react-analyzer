@@ -1,0 +1,28 @@
+{
+  "name": "react-analyzer",
+  "version": "1.0.0",
+  "description": "A library to analyze React components and extract prop types",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "for file in test/*.test.js; do node \"$file\"; done",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "analysis",
+    "props",
+    "typescript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.x.x",
+    "typescript": "^4.x.x"
+  },
+  "dependencies": {
+    "@babel/standalone": "^7.25.5",
+    "@babel/types": "^7.25.4"
+  }
+}
