@@ -1,6 +1,6 @@
 # react-analyzer
 
-Extract structured information about React components and their props through fast, reliable static analysis through AST parsing.
+Extract structured information about React components and their props through AST parsing.
 
 **Ideal for:**
 * Feeding high level codebase structure to LLMs
