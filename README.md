@@ -1,6 +1,8 @@
 # react-analyzer
 
-Extract structured information about React components and their props. You can feed high level codebase structure to LLMs, build developer tools, do static analysis, etc.
+Extract structured information about React components and their props through fast, reliable static analysis through AST parsing.
+
+It can be used for feeding high level codebase structure to LLMs, building developer tools / visual component editors, performing static analysis, documentation generation etc.
 
 **Included:**
 - Supports JSX and TSX files
@@ -51,6 +53,49 @@ Analysis result:
       message: { type: 'unknown', optional: false },
       user: { type: 'unknown', optional: false }
     }
+  }]
+}
+```
+
+### Simple TSX Component
+
+```tsx
+interface Props {
+  name: string;
+  age: number;
+  isActive?: boolean;
+}
+
+export const MyComponent = ({ name, age, isActive }: Props) => {
+  return <div>{name}: {age}</div>;
+};
+
+const Foo = MyComponent
+const Bar = Foo
+export { Bar }
+```
+
+Analysis result:
+
+```tsx
+{
+  type: 'tsx',
+  filename: 'MyComponent.tsx',
+  components: [{
+    name: 'MyComponent',
+    props: {
+      name: { type: 'string', optional: false },
+      age: { type: 'number', optional: false },
+      isActive: { type: 'boolean', optional: true },
+    },
+  },
+  {
+    name: 'Bar',
+    props: {
+      name: { type: 'string', optional: false },
+      age: { type: 'number', optional: false },
+      isActive: { type: 'boolean', optional: true },
+    },
   }]
 }
 ```
