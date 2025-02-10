@@ -12,9 +12,9 @@ It's ideal for feeding high level codebase structure to LLMs, building developer
 - Detects default props (`({ items = [] })` and prop types (`component.propTypes =`)
 - Processes generic types and utility types
 
-**Not included:**
+**Scope:**
 
-It only returns React components. You can easily tweak it for other frameworks or exported variables, functions, interfaces etc.
+Focused on React component analysis but internally scans all variables, functions, interfaces in given files. Can be extended for other frameworks, etc.
 
 ## Install
 
