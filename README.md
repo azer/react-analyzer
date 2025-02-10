@@ -2,7 +2,7 @@
 
 Extract structured information about React components and their props through fast, reliable static analysis through AST parsing.
 
-It can be used for feeding high level codebase structure to LLMs, building developer tools / visual component editors, performing static analysis, documentation generation etc.
+It's ideal for feeding high level codebase structure to LLMs, building developer tools / visual component editors, performing static analysis, documentation generation etc.
 
 **Included:**
 - Supports JSX and TSX files
