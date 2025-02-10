@@ -26,6 +26,18 @@ Focused on React component analysis but internally scans all variables, function
 npm install @azer/react-analyzer
 ```
 
+Compile:
+
+```bash
+npm run build
+```
+
+Run tests:
+
+```bash
+npm run test
+```
+
 ## Usage
 
 ```js
