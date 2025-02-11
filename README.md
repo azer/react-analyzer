@@ -23,7 +23,7 @@ Focused on React component analysis but internally scans all variables, function
 ## Install
 
 ```bash
-npm install @azer/react-analyzer
+npm install azer/react-analyzer
 ```
 
 Compile:
