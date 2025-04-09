@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "test": "for file in test/*.test.js; do node \"$file\"; done",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "build-demo": "esbuild src/index.ts --bundle --platform=browser --format=iife --global-name=ReactAnalyzer --outfile=demo/react-analyzer.js"
   },
   "keywords": [
     "react",

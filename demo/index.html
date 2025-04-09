@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Analyzer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+  <script>
+    const path = {
+      extname: (filename) => {
+        const parts = filename.split(".");
+        return parts.length > 1 ? "." + parts[parts.length - 1] : "";
+      },
+    };
+    const process = {
+      env: {
+        NODE_ENV: "production",
+        LOG: null,
+      },
+    };
+  </script>
+  <script src="react-analyzer.js"></script>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #editor-container, #result-container {
+      height: calc(100vh - 40px);
+    }
+    .header {
+      height: 40px;
+      background-color: rgba(20, 24, 31, 0.95);
+      color: rgba(255, 255, 255, 0.9);
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+      background-color: rgba(30, 34, 41, 0.95);
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: rgba(30, 34, 41, 0.95);
+      min-width: 180px;
+      box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+      z-index: 100;
+      border-radius: 4px;
+      border: 1px solid rgba(20, 24, 31, 0.95);;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .dropdown-item {
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .dropdown-item:hover {
+      background-color: rgba(60, 64, 71, 0.95);
+    }
+    /* Custom result container styling */
+    #result-container {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body class="bg-white">
+  <header class="header flex items-center justify-between px-3">
+    <div class="w-1/2 flex items-center justify-between px-3">
+    <div class="text-[12px] uppercase font-mono font-medium text-gray-400">
+    <a href="https://github.com/azer/react-analyzer" target="_blank" class="text-gray-100">
+      React Analyzer
+    </a>
+    <span>BY</span>
+    <a href="https://azerkoculu.com" target="_blank" class="text-gray-400 hover:text-gray-100">
+      @azerkoculu
+    </a>
+    </div>
+    <div class="dropdown">
+      <button class="text-[12px] font-mono uppercase text-gray-400 hover:text-gray-100 flex items-center gap-1">
+        Examples
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="dropdown-content">
+        <div class="dropdown-item" data-example="basic">Simple Component</div>
+        <div class="dropdown-item" data-example="hooks">Component with Hooks</div>
+        <div class="dropdown-item" data-example="typescript">TypeScript Component</div>
+        <div class="dropdown-item" data-example="complex">Complex Component</div>
+      </div>
+    </div>
+    </div>
+  </header>
+  <div class="flex h-full">
+    <div id="editor-container" class="w-1/2 border-r border-gray-200"></div>
+    <div id="result-container" class="w-1/2"></div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let codeEditor, resultEditor;
+      let analysisTimeout;
+      const DEBOUNCE_TIME = 500; // ms
+
+      // Sample code examples
+      const examples = {
+        basic: `// Simple React component
+import React from 'react';
+
+interface Props {
+  message: string;
+  count?: number;
+}
+
+function HelloWorld({ message, count = 0 }: Props) {
+  return <div>{message} (count: {count})</div>
+}
+
+export { HelloWorld };`,
+
+        hooks: `// Component with hooks
+import React, { useState, useEffect } from 'react';
+
+interface CounterProps {
+  initialCount?: number;
+  step?: number;
+}
+
+function Counter({ initialCount = 0, step = 1 }: CounterProps) {
+  const [count, setCount] = useState(initialCount);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCount(c => c + step);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [step]);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(initialCount)}>Reset</button>
+    </div>
+  );
+}
+
+export { Counter };`,
+
+        typescript: `// TypeScript component with complex props
+import React from 'react';
+
+type ButtonVariant = 'primary' | 'secondary' | 'danger';
+type ButtonSize = 'sm' | 'md' | 'lg';
+
+interface ButtonProps {
+  label: string;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  disabled?: boolean;
+  onClick?: () => void;
+  children?: React.ReactNode;
+}
+
+function Button({
+  label,
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
+  onClick,
+  children,
+}: ButtonProps) {
+  return (
+    <button
+      className={\`btn btn-\${variant} btn-\${size}\`}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {label}
+      {children}
+    </button>
+  );
+}
+
+export { Button };`,
+
+        complex: `// Complex component with multiple interfaces
+import React, { useState } from 'react';
+
+interface Address {
+  street: string;
+  city: string;
+  zipCode: string;
+  country: string;
+}
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  address?: Address;
+}
+
+interface UserFormProps {
+  initialUser?: User;
+  onSubmit: (user: User) => void;
+  onCancel: () => void;
+  isLoading?: boolean;
+}
+
+function UserForm({
+  initialUser = { id: 0, name: '', email: '' },
+  onSubmit,
+  onCancel,
+  isLoading = false
+}: UserFormProps) {
+  const [user, setUser] = useState<User>(initialUser);
+
+  const handleChange = (field: keyof User, value: any) => {
+    setUser({...user, [field]: value});
+  };
+
+  const handleAddressChange = (field: keyof Address, value: string) => {
+    setUser({
+      ...user,
+      address: {
+        ...(user.address || { street: '', city: '', zipCode: '', country: '' }),
+        [field]: value
+      }
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(user);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label>Name:</label>
+        <input
+          value={user.name}
+          onChange={(e) => handleChange('name', e.target.value)}
+        />
+      </div>
+      <div>
+        <label>Email:</label>
+        <input
+          value={user.email}
+          onChange={(e) => handleChange('email', e.target.value)}
+        />
+      </div>
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? 'Saving...' : 'Save'}
+      </button>
+      <button type="button" onClick={onCancel}>
+        Cancel
+      </button>
+    </form>
+  );
+}
+
+export { UserForm };`
+      };
+
+      // Initialize Monaco editor
+      require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        // Initialize the code editor
+        codeEditor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: examples.basic,
+          language: 'typescript',
+          theme: 'vs',
+          minimap: { enabled: false },
+          automaticLayout: true,
+          fontSize: 13,
+          lineHeight: 20,
+          padding: { top: 10 }
+        });
+
+        // Initialize the result editor (read-only) with custom styling
+        resultEditor = monaco.editor.create(document.getElementById('result-container'), {
+          value: '// Analysis results will appear here',
+          language: 'json',
+          theme: 'github-light',
+          readOnly: true,
+          automaticLayout: true,
+          formatOnPaste: true,
+          formatOnType: true,
+          fontSize: 13,
+          lineHeight: 20,
+          lineNumbers: 'off',
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          contextmenu: false
+        });
+
+        // Auto-analyze on content change with debounce
+        codeEditor.onDidChangeModelContent(function() {
+          clearTimeout(analysisTimeout);
+          analysisTimeout = setTimeout(analyzeCode, DEBOUNCE_TIME);
+        });
+
+        // Example selector event listeners
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+          item.addEventListener('click', function() {
+            const exampleKey = this.getAttribute('data-example');
+            if (examples[exampleKey]) {
+              codeEditor.setValue(examples[exampleKey]);
+              // Analysis will happen automatically via the change event
+            }
+          });
+        });
+
+        // Run initial analysis
+        setTimeout(analyzeCode, DEBOUNCE_TIME);
+      });
+
+      function analyzeCode() {
+        try {
+          const code = codeEditor.getValue();
+          const filename = code.includes('tsx') || code.includes('interface') ? 'Component.tsx' : 'Component.jsx';
+          // Use the bundled library
+          const result = ReactAnalyzer.analyzeReactFile(filename, code);
+          // Format the JSON result
+          const formattedResult = JSON.stringify(result, null, 2);
+          // Update the result editor
+          resultEditor.setValue(formattedResult);
+        } catch (error) {
+          resultEditor.setValue(`Error analyzing code: ${error.message}`);
+          console.error(error);
+    }
+
+    document.querySelector('#result-container .monaco-editor').style.backgroundColor = '#f5f5f5';
+
+      }
+    });
+  </script>
+</body>
+</html>

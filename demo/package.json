@@ -1,0 +1,19 @@
+{
+  "name": "react-analyzer-demo",
+  "version": "1.0.0",
+  "description": "Demo UI for react-analyzer",
+  "main": "app.js",
+  "scripts": {
+    "build": "node build.js",
+    "start": "serve -s .",
+    "dev": "npm run build && npm run start"
+  },
+  "devDependencies": {
+    "@babel/standalone": "^7.19.0",
+    "esbuild": "^0.15.7",
+    "serve": "^14.0.1"
+  },
+  "dependencies": {
+    "@babel/types": "^7.19.0"
+  }
+}
