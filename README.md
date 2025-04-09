@@ -16,6 +16,10 @@ Extract structured information about React components and their props through AS
 - Detects default props (`({ items = [] })` and prop types (`component.propTypes =`)
 - Processes generic types and utility types
 
+**Demo:**
+
+[![react analyzer 2](https://github.com/user-attachments/assets/f4fe84c5-13b6-4030-860e-de5095dcc2ca)](https://x.com/azerkoculu/status/1910013631766450294)
+
 **Scope:**
 
 Focused on React component analysis but internally scans all variables, functions, interfaces in given files. Can be extended for other frameworks, etc.
