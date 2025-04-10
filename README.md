@@ -1,6 +1,6 @@
 # react-analyzer
 
-Extract structured information about React components and their props through AST parsing.
+Extract structured information about React components and their props through AST parsing. See also: [react-analyzer-mcp](https://github.com/azer/react-analyzer-mcp)
 
 **Ideal for:**
 * Feeding high level codebase structure to LLMs
